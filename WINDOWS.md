@@ -1,49 +1,59 @@
-# Instalación en Windows
+# Instalación y prueba en Windows
 
-## 1. Clonar
+## 1. Actualizar el proyecto
 
 ```powershell
-git clone https://github.com/oortiz1186/job.git
-cd job
 git checkout feature/job-application-assistant-mvp
-```
-
-## 2. Instalar dependencias
-
-```powershell
+git pull origin feature/job-application-assistant-mvp
 npm install
 npx playwright install chromium
 ```
 
-## 3. Crear configuración local
+## 2. Configurar `.env`
+
+Si aún no existe:
 
 ```powershell
 Copy-Item .env.example .env
-Copy-Item data\profile.example.json data\profile.json
+notepad .env
 ```
 
-Edita `data\profile.json` y completa correo, teléfono, enlaces, respuestas y rutas reales de tus CVs.
+Ejemplo con Gemini:
 
-## 4. Primera ejecución
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=TU_API_KEY
+GEMINI_MODEL=gemini-2.5-flash
+HEADLESS=false
+MIN_MATCH=85
+WEB_PORT=3210
+PORTALS=linkedin,indeed,computrabajo,occ
+SEARCH_PREFILTER_SCORE=60
+SEARCH_CONCURRENCY=3
+```
+
+## 3. Iniciar portal
 
 ```powershell
-npm run apply -- "URL_DE_LA_VACANTE"
+npm run web
 ```
 
-Se abrirá Chrome con un perfil independiente almacenado en `.browser-profile`. La primera vez inicia sesión manualmente. No pongas usuario ni contraseña dentro del proyecto.
+Después abre:
 
-## 5. Funcionamiento
+```text
+http://localhost:3210
+```
 
-- Lee el texto visible de la vacante.
-- Calcula compatibilidad.
-- Si el resultado está por debajo de `MIN_MATCH`, no rellena automáticamente.
-- Si supera el umbral, elige el CV configurado según el tipo de puesto.
-- Rellena datos personales y preguntas conocidas.
-- Puede avanzar pasos intermedios.
-- Se detiene cuando detecta el botón final de envío.
+## 4. Uso
 
-## Importante
+1. Sube un CV.
+2. Pulsa **Analizar CV con IA**.
+3. Selecciona los portales.
+4. Ajusta el porcentaje mínimo.
+5. Pulsa **Buscar vacantes**.
+6. Revisa los resultados.
+7. Usa **Preparar postulación**, **Preparar seleccionadas** o **Preparar todas compatibles**.
+8. Chrome abrirá las solicitudes y tratará de completar campos/adjuntar el CV.
+9. Revisa cada formulario y realiza manualmente el envío final.
 
-LinkedIn e Indeed modifican su HTML con frecuencia. Si deja de detectar un botón o campo, actualiza los selectores en `src/platforms/` y `src/form-utils.js`.
-
-No automatices CAPTCHA, MFA ni controles anti-bot. Si aparece uno, resuélvelo manualmente.
+La primera vez puede ser necesario iniciar sesión manualmente en cada portal dentro de los perfiles de Chrome que crea el sistema.
