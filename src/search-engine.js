@@ -90,7 +90,8 @@ export async function searchPortals({
   concurrency = 3,
   fastMode = false,
   cachePath = 'data/search-cache.json',
-  cacheTtlHours = 168
+  cacheTtlHours = 168,
+  onProgress = () => {}
 }) {
   const profile = makeLocalProfile(aiProfile, cvText);
   const results = [];
@@ -101,14 +102,15 @@ export async function searchPortals({
   const cacheTtlMs = Math.max(1, cacheTtlHours) * 60 * 60 * 1000;
 
   console.log(`Modo: ${fastMode ? 'RÁPIDO' : 'NORMAL'} | Prefiltro IA: ${prefilterScore}% | Concurrencia: ${concurrency}`);
+  onProgress({ phase: 'collecting', completed: 0, total: 0, percent: 0, message: 'Buscando vacantes en los portales seleccionados...' });
 
-  // Fase 1: recolectar enlaces. Esto es rápido y evita repetir URLs entre búsquedas.
   for (const portal of portals) {
     const page = await context.newPage();
     try {
       for (const query of queries) {
         const searchUrl = portal.searchUrl(query);
         console.log(`\n[${portal.label}] Buscando: ${query}`);
+        onProgress({ phase: 'collecting', completed: candidates.length, total: 0, percent: 0, message: `${portal.label}: ${query}` });
         await page.goto(searchUrl, { waitUntil: 'domcontentloaded', timeout: 60000 }).catch(() => {});
         await page.waitForTimeout(fastMode ? 800 : 1400);
         const links = await collectLinks(page, portal, maxPerPortal);
@@ -126,6 +128,7 @@ export async function searchPortals({
 
   console.log(`\nVacantes únicas encontradas: ${candidates.length}`);
   console.log('Analizando detalles...');
+  onProgress({ phase: 'analyzing', completed: 0, total: candidates.length, percent: 0, message: `${candidates.length} vacantes encontradas. Analizando compatibilidad...` });
 
   const startedAt = Date.now();
   let completed = 0;
@@ -181,7 +184,7 @@ export async function searchPortals({
         };
       }
 
-      const item = {
+      results.push({
         portal: candidate.portal.id,
         query: candidate.query,
         title,
@@ -194,19 +197,21 @@ export async function searchPortals({
         reasons: evaluation.reasons || [],
         atsKeywords: evaluation.atsKeywords || [],
         evaluationSource: source
-      };
-      results.push(item);
+      });
     } finally {
       await detail.close().catch(() => {});
       completed++;
       const percent = candidates.length ? Math.round((completed / candidates.length) * 100) : 100;
       const eta = formatEta(startedAt, completed, candidates.length);
+      const progress = { phase: 'analyzing', completed, total: candidates.length, percent, eta, aiCalls, cacheHits, localRejected, found: results.length, message: `Analizando ${completed}/${candidates.length} · ETA ${eta}` };
+      onProgress(progress);
       console.log(`[${completed}/${candidates.length}] ${percent}% | ETA ${eta} | IA ${aiCalls} | caché ${cacheHits} | prefiltro ${localRejected}`);
     }
   });
 
   saveCache(resolvedCachePath, cache);
   console.log(`\nResumen análisis: IA=${aiCalls}, caché=${cacheHits}, descartadas localmente=${localRejected}`);
+  onProgress({ phase: 'done', completed: candidates.length, total: candidates.length, percent: 100, eta: '0s', aiCalls, cacheHits, localRejected, found: results.length, message: 'Búsqueda terminada.' });
 
   return results.sort((a, b) => b.score - a.score);
 }
