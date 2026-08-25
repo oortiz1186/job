@@ -1,0 +1,13 @@
+node_modules/
+.env
+data/profile.json
+data/search-results.json
+data/search-cache.json
+data/uploads/
+data/*.pdf
+data/*.docx
+data/*.txt
+.browser-profile/
+.browser-profile-search/
+applications/
+*.log
