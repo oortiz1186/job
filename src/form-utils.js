@@ -34,13 +34,19 @@ export async function clickIfPresent(page, patterns) {
 
 export function standardEntries(profile) {
   const p = profile.personal ?? {};
+  const parts = String(p.name || '').trim().split(/\s+/).filter(Boolean);
+  const firstName = p.firstName || parts[0] || '';
+  const lastName = p.lastName || parts.slice(1).join(' ');
   return [
-    { labels: ['first name', 'nombre'], value: p.firstName },
-    { labels: ['last name', 'apellido'], value: p.lastName },
+    { labels: ['full name', 'nombre completo'], value: p.name },
+    { labels: ['first name', 'nombre'], value: firstName },
+    { labels: ['last name', 'apellido'], value: lastName },
     { labels: ['email', 'correo'], value: p.email },
-    { labels: ['phone', 'teléfono', 'telefono'], value: p.phone },
+    { labels: ['phone', 'teléfono', 'telefono', 'celular', 'móvil', 'movil'], value: p.phone },
     { labels: ['city', 'ciudad'], value: p.city },
     { labels: ['state', 'estado'], value: p.state },
-    { labels: ['country', 'país', 'pais'], value: p.country }
+    { labels: ['country', 'país', 'pais'], value: p.country },
+    { labels: ['linkedin'], value: p.linkedin },
+    { labels: ['github'], value: p.github }
   ];
 }
