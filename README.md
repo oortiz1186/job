@@ -4,57 +4,50 @@ Asistente local y semi-automático para analizar un CV, buscar vacantes compatib
 
 ## Portal web
 
-La forma recomendada de usar el proyecto ahora es mediante la interfaz visual.
-
 ```powershell
 npm install
 npx playwright install chromium
 npm run web
 ```
 
-Abre:
+Abre `http://localhost:3210`.
 
-```text
-http://localhost:3210
-```
+Desde el portal puedes subir un CV PDF/DOCX/TXT/MD, analizarlo con IA, elegir portales, configurar el porcentaje mínimo, buscar vacantes, revisar compatibilidad y preparar una, varias o todas las vacantes compatibles. El sistema completa campos compatibles y adjunta el CV, pero **no pulsa el botón final de envío**.
 
-Desde el portal puedes:
+## Proveedores de IA
 
-1. Subir un CV en PDF, DOCX, TXT o MD.
-2. Analizarlo con OpenAI o Gemini.
-3. Elegir LinkedIn, Indeed, Computrabajo y/o OCC.
-4. Configurar el porcentaje mínimo de compatibilidad.
-5. Buscar vacantes generadas a partir del perfil detectado en el CV.
-6. Ver resultados ordenados por porcentaje de compatibilidad.
-7. Revisar coincidencias, faltantes y explicación del análisis.
-8. Abrir una vacante para revisarla manualmente.
-9. Preparar una postulación individual.
-10. Seleccionar varias y preparar las seleccionadas.
-11. Preparar todas las vacantes compatibles con el umbral configurado.
+Se soportan DeepSeek, Gemini y OpenAI. El portal permite cambiar el proveedor en ejecución sin exponer las API keys al navegador.
 
-El sistema completa campos compatibles y adjunta el CV, pero **no pulsa el botón final de envío**. La revisión y confirmación final permanecen bajo control del usuario.
-
-## Configuración
-
-Copia `.env.example` a `.env` y configura un proveedor de IA.
-
-### Gemini
+Configuración recomendada con fallback:
 
 ```env
-AI_PROVIDER=gemini
-GEMINI_API_KEY=tu_api_key
-GEMINI_MODEL=gemini-2.5-flash
-```
+AI_PROVIDER=auto
+AI_FALLBACK=true
+AI_FALLBACK_ORDER=deepseek,gemini,openai
 
-### OpenAI
+DEEPSEEK_API_KEY=tu_api_key
+DEEPSEEK_MODEL=deepseek-chat
+DEEPSEEK_BASE_URL=https://api.deepseek.com
 
-```env
-AI_PROVIDER=openai
-OPENAI_API_KEY=tu_api_key
+GEMINI_API_KEY=
+GEMINI_MODEL=gemini-2.5-flash-lite
+
+OPENAI_API_KEY=
 OPENAI_MODEL=gpt-4.1-mini
 ```
 
-Configuración recomendada:
+`AI_PROVIDER` acepta `auto`, `deepseek`, `gemini`, `openai` o `none`. En `auto`, se prueba el orden indicado por `AI_FALLBACK_ORDER`, omitiendo proveedores sin API key. Si un proveedor falla o alcanza cuota y `AI_FALLBACK=true`, el sistema intenta el siguiente disponible.
+
+Puedes usar solo DeepSeek:
+
+```env
+AI_PROVIDER=deepseek
+AI_FALLBACK=false
+DEEPSEEK_API_KEY=tu_api_key
+DEEPSEEK_MODEL=deepseek-chat
+```
+
+## Configuración general
 
 ```env
 HEADLESS=false
@@ -98,40 +91,8 @@ Revisión humana
 Envío final manual
 ```
 
-## Optimización
+## Optimización y privacidad
 
-La búsqueda usa prefiltro local antes de gastar IA, concurrencia limitada, caché de evaluaciones, progreso y ETA aproximado, además de modo rápido desde la interfaz.
-
-## Privacidad
-
-No se guardan contraseñas en el proyecto. Las sesiones de los portales viven únicamente en perfiles locales de Chrome. Los CV subidos, `profile.json`, resultados, caché y perfiles de navegador están ignorados por Git.
+La búsqueda usa prefiltro local antes de gastar IA, concurrencia limitada, caché de evaluaciones, progreso y ETA aproximado. No se guardan contraseñas en el proyecto. Las sesiones de los portales viven únicamente en perfiles locales de Chrome. Los CV, `profile.json`, resultados, caché y perfiles de navegador están ignorados por Git.
 
 La primera vez que se abra un portal puede ser necesario iniciar sesión manualmente. No se intenta evadir CAPTCHA, MFA ni controles anti-bot.
-
-## Terminal
-
-La CLI sigue disponible.
-
-Crear perfil:
-
-```powershell
-npm run profile -- --cv "C:\CV\curriculum.pdf"
-```
-
-Buscar:
-
-```powershell
-npm run search -- --cv "C:\CV\curriculum.pdf" --portals linkedin,indeed --fast
-```
-
-Preparar una URL:
-
-```powershell
-npm run apply -- "URL_DE_LA_VACANTE" --cv "C:\CV\curriculum.pdf"
-```
-
-## Nota sobre despliegue
-
-El dashboard puede servirse como web, pero la preparación automática de solicitudes usa Playwright y un perfil de Chrome con las sesiones del usuario. En esta versión se recomienda ejecutar el portal en la misma PC del usuario.
-
-Para publicarlo como un SaaS real no basta con subir este servidor tal cual: habría que separar la interfaz web de un **worker de navegador por usuario**, aislar sesiones y CVs, incorporar autenticación, almacenamiento persistente y una cola de tareas. Esa será la arquitectura correcta para una versión multiusuario pública.
