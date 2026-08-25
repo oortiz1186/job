@@ -1,28 +1,38 @@
 # Job Application Assistant
 
-Asistente local y semi-automático para preparar postulaciones en LinkedIn e Indeed sin compartir credenciales.
+Asistente local y semi-automático para buscar, evaluar y preparar postulaciones usando el CV real de cada usuario.
 
-## Objetivo
+## Qué hace
 
-1. Mantener la sesión del navegador en el equipo del usuario.
-2. Analizar la descripción de una vacante.
-3. Calcular compatibilidad contra un perfil profesional local.
-4. Preparar respuestas y seleccionar el CV adecuado.
-5. Completar campos repetitivos con Playwright.
-6. Detenerse antes del envío final para revisión humana.
+1. El usuario adjunta un CV local en PDF, DOCX, TXT o MD.
+2. La IA analiza el CV y genera un perfil profesional estructurado sin inventar datos.
+3. El usuario elige en qué portales buscar:
+   - LinkedIn
+   - Indeed
+   - Computrabajo
+   - OCC
+4. La IA genera búsquedas de puestos a partir del propio CV.
+5. El sistema recorre los portales seleccionados y obtiene vacantes visibles en navegador.
+6. Cada vacante recibe un porcentaje de compatibilidad y una explicación.
+7. Solo las vacantes que superan `MIN_MATCH` quedan recomendadas para aplicar.
+8. Al abrir una solicitud, el sistema completa campos repetitivos y adjunta el CV.
+9. Siempre se detiene antes del envío final para revisión humana.
 
-## Seguridad
+## Seguridad y privacidad
 
-- No almacena contraseñas de LinkedIn o Indeed.
+- No almacena contraseñas de portales.
+- La sesión se conserva únicamente en `.browser-profile/` dentro del equipo local.
+- Los CV, el perfil generado y los resultados de búsqueda están ignorados por Git.
 - No intenta evadir CAPTCHA, MFA ni mecanismos anti-bot.
-- No pulsa el botón final de envío de solicitud.
-- No inventa experiencia; las respuestas se basan en el perfil configurado.
+- No pulsa automáticamente el botón final de envío.
+- La IA recibe el texto del CV únicamente cuando el usuario configura un proveedor de IA externo.
 
 ## Requisitos
 
 - Node.js 20+
 - npm
-- Google Chrome instalado
+- Google Chrome
+- Opcional: API key de OpenAI o Google Gemini
 
 ## Instalación
 
@@ -30,32 +40,162 @@ Asistente local y semi-automático para preparar postulaciones en LinkedIn e Ind
 npm install
 npx playwright install chromium
 cp .env.example .env
-cp data/profile.example.json data/profile.json
 ```
 
-Edita `data/profile.json` con tus datos reales y conserva ese archivo fuera de Git. `data/profile.json` está ignorado por `.gitignore`.
+En Windows PowerShell:
 
-## Uso
+```powershell
+npm install
+npx playwright install chromium
+Copy-Item .env.example .env
+```
+
+## Configurar IA
+
+### Gemini
+
+```env
+AI_PROVIDER=gemini
+GEMINI_API_KEY=tu_api_key
+GEMINI_MODEL=gemini-2.5-flash
+```
+
+### OpenAI
+
+```env
+AI_PROVIDER=openai
+OPENAI_API_KEY=tu_api_key
+OPENAI_MODEL=gpt-4.1-mini
+```
+
+También puede usarse `AI_PROVIDER=none`; en ese modo el scoring es local y las búsquedas deben indicarse manualmente con `--query`.
+
+## Adjuntar un CV y crear perfil
+
+Coloca el CV en cualquier carpeta local y ejecuta:
 
 ```bash
-npm run start
+npm run profile -- --cv "C:/ruta/CV.pdf"
 ```
 
-También puedes ejecutar una URL concreta:
+Se crea `data/profile.json`. Revísalo antes de usarlo. Los datos no detectados quedan vacíos.
+
+También puedes configurar:
+
+```env
+CV_PATH=C:/ruta/CV.pdf
+```
+
+## Seleccionar portales
+
+En `.env`:
+
+```env
+PORTALS=linkedin,indeed,computrabajo,occ
+```
+
+O en cada búsqueda:
 
 ```bash
-npm run apply -- "https://www.linkedin.com/jobs/view/..."
+npm run search -- --cv "C:/ruta/CV.pdf" --portals linkedin,indeed
 ```
 
-El asistente abrirá Chromium con un perfil persistente local en `.browser-profile/`. La primera vez inicia sesión manualmente en LinkedIn o Indeed. Después esa sesión se reutiliza localmente.
+Ejemplos:
 
-## Estado actual
+```bash
+npm run search -- --cv "C:/ruta/CV.pdf" --portals linkedin,occ
+npm run search -- --cv "C:/ruta/CV.pdf" --portals indeed,computrabajo
+```
 
-MVP orientado a:
+## Buscar vacantes con IA
 
-- LinkedIn Easy Apply: relleno básico de campos comunes y pausa antes de enviar.
-- Indeed: relleno básico de formularios comunes y pausa antes de enviar.
-- Scoring local por palabras clave y experiencia.
-- Banco de respuestas reutilizables.
+```bash
+npm run search -- --cv "C:/ruta/CV.pdf" --portals linkedin,indeed,computrabajo,occ
+```
 
-Los portales cambian con frecuencia; los selectores pueden necesitar mantenimiento.
+La IA genera de 5 a 10 búsquedas adecuadas al perfil. Los resultados se guardan localmente en:
+
+```text
+data/search-results.json
+```
+
+Cada registro contiene portal, puesto, URL, porcentaje, recomendación, coincidencias, faltantes, razones y palabras clave ATS.
+
+Para limitar a una búsqueda concreta:
+
+```bash
+npm run search -- --cv "C:/ruta/CV.pdf" --portals linkedin,indeed --query "Senior Full Stack Developer"
+```
+
+## Umbral de compatibilidad
+
+```env
+MIN_MATCH=85
+```
+
+Puedes cambiarlo por ejecución:
+
+```bash
+npm run search -- --cv "C:/ruta/CV.pdf" --min-match 90
+```
+
+## Preparar una solicitud
+
+```bash
+npm run apply -- "URL_DE_LA_VACANTE" --cv "C:/ruta/CV.pdf"
+```
+
+El sistema:
+
+- abre la vacante;
+- analiza compatibilidad;
+- usa IA si está configurada;
+- detiene el proceso si el match es demasiado bajo;
+- completa campos comunes;
+- adjunta el CV indicado;
+- avanza por pasos intermedios compatibles;
+- se detiene antes del envío final.
+
+## Portales soportados
+
+### LinkedIn
+Soporte inicial para Easy Apply / Solicitud sencilla.
+
+### Indeed
+Soporte inicial para formularios de aplicación visibles desde Indeed.
+
+### Computrabajo
+Búsqueda y manejador genérico de formularios. Algunos procesos pueden redirigir a sitios externos.
+
+### OCC
+Búsqueda y manejador genérico de formularios. Algunos procesos pueden redirigir al sitio del empleador.
+
+## Limitaciones
+
+Los portales cambian HTML, selectores y flujos con frecuencia. CAPTCHA, MFA, redirecciones externas y preguntas no estándar requieren intervención humana. La primera versión está pensada como asistente, no como bot de envío masivo.
+
+## Flujo recomendado
+
+```text
+CV
+ ↓
+IA analiza perfil
+ ↓
+Genera puestos objetivo
+ ↓
+Usuario selecciona portales
+ ↓
+Búsqueda multiportal
+ ↓
+IA compara CV vs vacante
+ ↓
+Compatibilidad >= umbral
+ ↓
+Preparar solicitud
+ ↓
+Adjuntar CV + llenar campos
+ ↓
+Revisión humana
+ ↓
+Enviar
+```
