@@ -1,17 +1,20 @@
 {
   "name": "job-application-assistant",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "private": true,
   "type": "module",
   "scripts": {
     "start": "node src/index.js",
-    "profile": "node src/profile-cli.js",
-    "search": "node src/search-cli.js",
+    "web": "node src/server.js",
     "apply": "node src/index.js --url",
-    "score": "node src/score-cli.js"
+    "score": "node src/score-cli.js",
+    "profile": "node src/profile-cli.js",
+    "search": "node src/search-cli.js"
   },
   "dependencies": {
     "dotenv": "^16.4.7",
+    "express": "^5.1.0",
+    "multer": "^1.4.5-lts.2",
     "mammoth": "^1.9.0",
     "pdf-parse": "^1.1.1",
     "playwright": "^1.51.1"
