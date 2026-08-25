@@ -47,18 +47,29 @@ export async function askAI(prompt) {
 }
 
 export async function analyzeCvWithAI(cvText) {
-  const prompt = `Analiza este CV para búsqueda de empleo. No inventes datos. Devuelve SOLO JSON válido con esta forma:\n{
-  "headline": "",
-  "seniority": "",
-  "yearsExperience": 0,
-  "skills": [],
-  "roles": [],
-  "industries": [],
-  "languages": [],
-  "searchQueries": [],
-  "strengths": [],
-  "constraints": []
-}\nGenera de 5 a 10 searchQueries realistas basadas únicamente en el CV.\nCV:\n${cvText.slice(0, 30000)}`;
+  const prompt = `Analiza este CV para búsqueda de empleo. No inventes ni completes datos ausentes. Devuelve SOLO JSON válido con esta forma:\n{
+  "personal": {
+    "name": "",
+    "email": "",
+    "phone": "",
+    "city": "",
+    "country": "",
+    "linkedin": "",
+    "github": ""
+  },
+  "professional": {
+    "headline": "",
+    "seniority": "",
+    "yearsExperience": 0,
+    "skills": [],
+    "roles": [],
+    "industries": [],
+    "languages": [],
+    "searchQueries": [],
+    "strengths": [],
+    "constraints": []
+  }
+}\nGenera de 5 a 10 searchQueries realistas basadas únicamente en el CV. Si un dato personal no aparece, déjalo vacío.\nCV:\n${cvText.slice(0, 30000)}`;
   return safeJson(await askAI(prompt));
 }
 
