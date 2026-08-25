@@ -1,6 +1,11 @@
 node_modules/
 .env
 data/profile.json
+data/search-results.json
+data/*.pdf
+data/*.docx
+data/*.txt
+data/*.md
 .browser-profile/
 applications/
 *.log
