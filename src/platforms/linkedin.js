@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import { fillByLabels, standardEntries, clickIfPresent } from '../form-utils.js';
+import { fillKnownQuestions } from '../answers.js';
 
 export async function handleLinkedIn(page, profile, resumePath) {
   await fillByLabels(page, standardEntries(profile));
@@ -11,6 +12,7 @@ export async function handleLinkedIn(page, profile, resumePath) {
   }
 
   await fillByLabels(page, standardEntries(profile));
+  await fillKnownQuestions(page, profile);
 
   if (resumePath && fs.existsSync(resumePath)) {
     const upload = page.locator('input[type=file]').first();
@@ -25,6 +27,7 @@ export async function handleLinkedIn(page, profile, resumePath) {
     if (!moved) break;
     await page.waitForTimeout(800);
     await fillByLabels(page, standardEntries(profile));
+    await fillKnownQuestions(page, profile);
   }
 
   console.log('LinkedIn preparado. Revisa todos los datos y realiza manualmente el envío final.');
