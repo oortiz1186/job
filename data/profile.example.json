@@ -1,0 +1,51 @@
+{
+  "personal": {
+    "firstName": "Octavio",
+    "lastName": "Ortiz Rivas",
+    "email": "",
+    "phone": "",
+    "city": "León",
+    "state": "Guanajuato",
+    "country": "México",
+    "linkedin": "",
+    "github": ""
+  },
+  "professional": {
+    "headline": "Senior Full Stack Developer | .NET | Angular | React | TypeScript",
+    "yearsExperience": 15,
+    "englishLevel": "B1",
+    "salaryExpectationMonthlyMXN": 30000,
+    "availability": "A convenir",
+    "remotePreferred": true,
+    "skills": [
+      ".NET", "C#", "VB.NET", "ASP.NET MVC", "ASP.NET Core", "Angular", "React", "Next.js",
+      "TypeScript", "JavaScript", "Node.js", "NestJS", "REST API", "SQL Server", "PostgreSQL",
+      "Supabase", "MySQL", "Sybase", "Docker", "Git", "GitHub Actions", "Ubuntu Server",
+      "Windows Server", "Cloudflare", "AWS", "OpenAI API", "Google Gemini", "Scrum", "Agile"
+    ],
+    "experienceKeywords": [
+      "Full Stack", "Software Development", "Software Architecture", "System Integration",
+      "Requirements Analysis", "Technical Consulting", "IT Infrastructure", "Digital Transformation",
+      "Technical Leadership", "Code Review", "Deployment", "Support", "Training"
+    ]
+  },
+  "answers": {
+    "authorizedToWork": "Sí",
+    "requiresSponsorship": "No",
+    "willingToRelocate": "Depende de la oportunidad",
+    "remoteWork": "Sí",
+    "noticePeriod": "A convenir",
+    "highestEducation": "TSU en Sistemas Informáticos",
+    "yearsDotNet": 6,
+    "yearsCSharp": 6,
+    "yearsAngular": 6,
+    "yearsTypeScript": 6,
+    "yearsSqlServer": 6
+  },
+  "resumeFiles": {
+    "default": "C:/CV/CV_Octavio_Ortiz_Rivas.pdf",
+    "dotnet": "C:/CV/CV_Octavio_DotNet.pdf",
+    "lead": "C:/CV/CV_Octavio_TechLead.pdf",
+    "itManager": "C:/CV/CV_Octavio_IT_Manager.pdf"
+  }
+}
