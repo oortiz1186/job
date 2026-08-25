@@ -109,7 +109,7 @@ app.post('/api/search', async (req, res) => {
 
   const minMatch = Math.max(0, Math.min(100, Number(req.body.minMatch ?? process.env.MIN_MATCH ?? 85)));
   const fastMode = req.body.fastMode !== false;
-  const prefilterScore = Math.max(0, Math.min(100, Number(req.body.prefilterScore ?? process.env.SEARCH_PREFILTER ?? (fastMode ? 65 : 60))));
+  const prefilterScore = Math.max(0, Math.min(100, Number(req.body.prefilterScore ?? process.env.SEARCH_PREFILTER_SCORE ?? (fastMode ? 65 : 60))));
   const concurrency = Math.max(1, Math.min(5, Number(req.body.concurrency ?? process.env.SEARCH_CONCURRENCY ?? (fastMode ? 4 : 3))));
   const maxPerPortal = Math.max(1, Math.min(50, Number(req.body.maxPerPortal ?? process.env.SEARCH_MAX_PER_PORTAL ?? 20)));
   const queries = Array.isArray(currentProfile.professional?.searchQueries) ? currentProfile.professional.searchQueries : [];
@@ -147,6 +147,7 @@ app.post('/api/search', async (req, res) => {
         prefilterScore,
         concurrency,
         fastMode,
+        cacheTtlHours: Number(process.env.SEARCH_CACHE_TTL_HOURS || 168),
         onProgress: progress => { state.progress = progress; }
       });
 
