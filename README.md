@@ -132,4 +132,6 @@ npm run apply -- "URL_DE_LA_VACANTE" --cv "C:\CV\curriculum.pdf"
 
 ## Nota sobre despliegue
 
-El dashboard puede servirse como web, pero la preparación automática de solicitudes usa Playwright y un perfil de Chrome con las sesiones del usuario. En esta versión se recomienda ejecutar el portal en la misma PC del usuario. Para convertirlo en un SaaS público se requiere separar el dashboard del worker de navegador y administrar sesiones aisladas por usuario.
+El dashboard puede servirse como web, pero la preparación automática de solicitudes usa Playwright y un perfil de Chrome con las sesiones del usuario. En esta versión se recomienda ejecutar el portal en la misma PC del usuario.
+
+Para publicarlo como un SaaS real no basta con subir este servidor tal cual: habría que separar la interfaz web de un **worker de navegador por usuario**, aislar sesiones y CVs, incorporar autenticación, almacenamiento persistente y una cola de tareas. Esa será la arquitectura correcta para una versión multiusuario pública.
